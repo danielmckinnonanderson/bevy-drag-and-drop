@@ -4,13 +4,15 @@ use bevy::{
     window::PrimaryWindow,
 };
 
+/// Marker component which designates a camera to use when updating the
+/// cursor position resource.
 #[derive(Component)]
 pub struct DragAndDropMainCamera;
 
 /// Marker component that indicates its entity can be dragged via the mouse.
 /// The rectangle is its bounding box.
 #[derive(Component)]
-pub struct Draggable(Rectangle);
+pub struct Draggable(pub Rectangle);
 
 /// Marker component that indicates that its entity is being dragged by the mouse.
 #[derive(Component)]
@@ -18,7 +20,7 @@ pub struct Dragging;
 
 /// Resource which tracks the current position of the relevant drag & drop cursor.
 #[derive(Resource, Default)]
-pub struct DragAndDropCursorPosition(Vec2);
+pub struct DragAndDropCursorPosition(pub Vec2);
 
 pub struct CursorDragAndDropPlugin;
 
@@ -45,7 +47,7 @@ impl Plugin for CursorDragAndDropPlugin {
     }
 }
 
-// Every frame, update the cursor position resource with the current mouse position.
+/// Every frame, update the cursor position resource with the current mouse position.
 fn update_cursor_ui_position_sys(
     mut mouse_pos: ResMut<DragAndDropCursorPosition>,
     window_q: Query<&Window, With<PrimaryWindow>>,
@@ -64,8 +66,8 @@ fn update_cursor_ui_position_sys(
     }
 }
 
-// Check if the mouse position is over a Draggable entity.
-// If so, configure the dragging state to target this entity.
+/// Check if the mouse position is over a Draggable entity.
+/// If so, configure the dragging state to target this entity.
 fn begin_dragging_draggable_sys(
     mut commands: Commands,
     mut draggables_q: Query<(&Transform, &Draggable, Entity)>,
@@ -74,7 +76,7 @@ fn begin_dragging_draggable_sys(
     // Iterate through query, checking each position against
     // the mouse position during the input event.
     // If the mouse is over ("within" in 2D space) an element,
-    // update the `InputDraggingState` to reflect that `Draggable`.
+    // add a `Dragging` component to that entity.
     draggables_q.iter_mut().for_each(|draggable| {
         let xlation = draggable.0.translation.xy();
         let draggable_rect: Rectangle = draggable.1 .0;
@@ -85,7 +87,7 @@ fn begin_dragging_draggable_sys(
     });
 }
 
-// Translate the `Dragging` entity according to the mouse position
+/// Translate the `Dragging` entity according to the mouse position
 fn translate_dragging_draggable_sys(
     mut dragging_q: Query<(Entity, &mut Transform), (With<Dragging>, With<Draggable>)>,
     mouse_pos: Res<DragAndDropCursorPosition>,
@@ -96,9 +98,9 @@ fn translate_dragging_draggable_sys(
     }
 }
 
-// Triggered when the player releases left-mouse button
-// while dragging a draggable entity, the `Dragging` component
-// is removed, causing the drag to end.
+/// Triggered when the player releases left-mouse button
+/// while dragging a draggable entity, the `Dragging` component
+/// is removed, causing the drag to end.
 fn end_dragging_motion_sys(
     mut commands: Commands,
     dragging_q: Query<Entity, (With<Dragging>, With<Draggable>)>,
