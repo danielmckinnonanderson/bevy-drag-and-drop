@@ -1,0 +1,11 @@
+[package]
+name = "bevy-cards"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+bevy = { version = ">=0.14.0", features = ["dynamic_linking"] }
+
